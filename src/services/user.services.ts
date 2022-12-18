@@ -109,7 +109,16 @@ class UserService {
         return { message: 'Invalid credentials', status: 'fail', data: null };
       }
 
-      const a = { token: createUserJwtToken({ id: user._id }), data: user };
+      if (!compareSync(payload.password, user?.password)) {
+        return { message: 'Invalid matric number or password', status: 'fail', data: null };
+      }
+
+      const a = {
+        status: 'success',
+        message: 'login successfully',
+        token: createUserJwtToken({ id: user._id }),
+        data: user,
+      };
 
       if (a.data) {
         delete a.data.password;
@@ -149,7 +158,7 @@ class UserService {
 
       return {
         status: 'success',
-        message: 'transaction retreived successfully',
+        message: 'transaction retrieved successfully',
         data: allPayments,
       };
     } catch (error) {
@@ -166,6 +175,7 @@ class UserService {
       const { tx_ref, tx_id, amount, payment_id } = payload.body;
 
       const payment = await this.payment.findById(payment_id);
+      console.log({ payment });
 
       user.transactions[user.currentLevel].push({
         txn_ref: tx_ref,

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import { ROLES } from '../utils/constants';
 
-const LevelTransaction = new mongoose.Schema(
+const LevelTransactionSchema = new mongoose.Schema(
   {
     amount: {
       type: Number,
@@ -17,9 +17,9 @@ const LevelTransaction = new mongoose.Schema(
       required: true,
     },
     payment_id: {
-      type: mongoose.Types.ObjectId,
+      type: Object,
       required: true,
-      ref: 'Payment',
+      // ref: 'Payment',
     },
     status: {
       type: Boolean,
@@ -43,7 +43,6 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false,
     },
     verified: {
       type: String,
@@ -68,17 +67,13 @@ const UserSchema = new mongoose.Schema(
         default: ROLES.Student, // either member (2439) or non-member (1521)
       },
       ClassRep: Number,
-      Lecturer: Number,
-      ClassAdvisorHead: Number,
-      DepartmentHOD: Number,
-      FacultyDean: Number,
       ITPersonel: Number,
     },
     transactions: {
-      100: [LevelTransaction],
-      200: [LevelTransaction],
-      300: [LevelTransaction],
-      400: [LevelTransaction],
+      100: [LevelTransactionSchema],
+      200: [LevelTransactionSchema],
+      300: [LevelTransactionSchema],
+      400: [LevelTransactionSchema],
     },
     currentLevel: {
       type: String,
@@ -88,4 +83,5 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+export const LevelTransaction = mongoose.model('LevelTransaction', LevelTransactionSchema);
 export const User = mongoose.model('User', UserSchema);

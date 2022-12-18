@@ -5,6 +5,7 @@ export type JwtPayload = {
   contact?: string;
   role?: string;
   warehouse?: string;
+  login_id?: string;
 };
 
 export const createUserJwtToken = (payload: JwtPayload): string => {
