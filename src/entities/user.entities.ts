@@ -25,6 +25,15 @@ const LevelTransactionSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    naration: {
+      type: String,
+      required: true,
+    },
+    transaction_id: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Transaction',
+      required: true,
+    },
   },
   { timestamps: true },
 );

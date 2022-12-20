@@ -4,6 +4,7 @@ import axios from 'axios';
 import { compareSync, hashSync } from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextFunction } from 'express';
+import Flutterwave from 'flutterwave-node-v3';
 import { Service } from 'typedi';
 
 import { User, Payment, Transaction } from '../entities';
@@ -18,6 +19,7 @@ class UserService {
     private readonly user = User,
     private readonly payment = Payment,
     private readonly transaction = Transaction,
+    private readonly flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY),
   ) {}
 
   async register(payload, next: NextFunction) {
@@ -172,36 +174,60 @@ class UserService {
 
   async recordTransaction(payload, next: NextFunction) {
     try {
-      const user = await this.user.findById(payload.id);
-
       const { tx_ref, tx_id, amount, payment_id } = payload.body;
 
-      const payment = await this.payment.findById(payment_id);
-      console.log({ payment });
+      return this.flw.Transaction.verify({ id: tx_id })
+        .then(async (response: any) => {
+          if (
+            response.data.status === 'successful' &&
+            response.data.amount === parseInt(amount) &&
+            response.data.currency === 'NGN'
+          ) {
+            // Success! Confirm the customer's payment
+            const user = await this.user.findById(payload.id);
 
-      user.transactions[user.currentLevel].push({
-        txn_ref: tx_ref,
-        txn_id: tx_id,
-        payment_id: payment,
-        amount,
-      });
+            const payment = await this.payment.findById(payment_id);
 
-      const newTransaction = new this.transaction({
-        amount,
-        tx_ref,
-        userId: user._id,
-        payment_id: payment,
-      });
+            const newTransaction = new this.transaction({
+              amount,
+              tx_ref,
+              payment_id: payment,
+              naration: response.data.narration,
+              customerName: response.data.customer.name,
+            });
 
-      await user.save();
+            user.transactions[user.currentLevel].push({
+              txn_ref: tx_ref,
+              txn_id: tx_id,
+              payment_id: payment,
+              amount,
+              naration: response.data.narration,
+              transaction_id: newTransaction._id,
+            });
 
-      await newTransaction.save();
+            await user.save();
 
-      return {
-        status: 'success',
-        message: 'transaction saved successfully',
-        data: null,
-      };
+            await newTransaction.save();
+
+            return {
+              status: 'success',
+              message: 'transaction saved successfully',
+              data: null,
+            };
+          } else {
+            // Inform the customer their payment was unsuccessful
+            return {
+              status: 'fail',
+              message: 'Payment was unsuccessful',
+              data: null,
+            };
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
+
+          return next(new CustomError(400, 'Raw', 'Error', null, err));
+        });
     } catch (error) {
       console.log(error);
 

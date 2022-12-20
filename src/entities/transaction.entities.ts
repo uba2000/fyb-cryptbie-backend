@@ -27,15 +27,19 @@ const TransactionSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    userId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
     transaction_type: {
       type: String,
       // quickteller - Q
       // flutterwave - F
       default: 'F',
+    },
+    naration: {
+      type: String,
+      required: true,
+    },
+    customerName: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true },
