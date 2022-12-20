@@ -37,7 +37,7 @@ class LecturerService {
           Array.from(allLevelKeys).forEach((lk) => {
             if (d.transactions[lk].length > 0) {
               d.transactions[lk].forEach((dt: any) => {
-                dt = { ...dt._doc, name: `${d.firstname} ${d.lastname}` };
+                dt = { ...dt._doc, name: `${d.firstname} ${d.lastname}`, matNo: d.matNo };
                 allPayments.push(dt);
               });
             }
@@ -46,7 +46,7 @@ class LecturerService {
           // add just the level of the lecturer
           const levelTransactions = d.transactions[lecturer.levelInChargeOf];
           levelTransactions.forEach((dt: any) => {
-            dt = { ...dt._doc, name: `${d.firstname} ${d.lastname}` };
+            dt = { ...dt._doc, name: `${d.firstname} ${d.lastname}`, matNo: d.matNo };
             allPayments.push(dt);
           });
         }

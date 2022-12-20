@@ -155,6 +155,7 @@ class UserService {
           payData.price = isPaid?.amount;
           payData.txn_id = isPaid?.txn_id;
           payData.txn_ref = isPaid?.txn_ref;
+          payData.naration = isPaid?.naration;
         }
 
         return payData;
